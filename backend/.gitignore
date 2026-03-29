@@ -1,0 +1,37 @@
+# Virtual environment
+venv/
+env/
+ENV/
+.venv/
+
+# Compiled files
+*.pyc
+__pycache__/
+*.$py.class
+
+# Distribution/Packaging
+.Python
+build/
+dist/
+wheels/
+*.egg-info/
+
+# Logs and Databases
+*.log
+*.sqlite
+*.sqlite3
+
+# Environment Variables and Sensitive Files
+.env
+*.env
+instance/*.env
+keys/*.json
+
+# IDE and OS Files
+.idea/
+.vscode/
+*.suo
+*.user
+*.sln.ide/
+.DS_Store
+Thumbs.db

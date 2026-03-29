@@ -1,0 +1,155 @@
+{
+    "nodes": [
+        {
+            "id": "userInput-1",
+            "type": "customInput",
+            "position": {
+                "x": 100,
+                "y": 100
+            },
+            "data": {
+                "id": "userInput-1",
+                "nodeType": "customInput",
+                "inputName": "userQuestion",
+                "inputType": "Text"
+            },
+            "width": 250,
+            "height": 180
+        },
+        {
+            "id": "embedding-1",
+            "type": "apiRequest",
+            "position": {
+                "x": 500,
+                "y": 80
+            },
+            "data": {
+                "id": "embedding-1",
+                "nodeType": "apiRequest",
+                "method": "POST",
+                "url": "https://api.openai.com/v1/embeddings",
+                "headers": "{\"Authorization\": \"Bearer YOUR_API_KEY\"}",
+                "body": "{\"input\": \"{{userInput-1.value}}\", \"model\": \"text-embedding-ada-002\"}"
+            },
+            "width": 300,
+            "height": 400
+        },
+        {
+            "id": "vectorDB-1",
+            "type": "database",
+            "position": {
+                "x": 950,
+                "y": 100
+            },
+            "data": {
+                "id": "vectorDB-1",
+                "nodeType": "database",
+                "query": "SELECT content, metadata FROM documents ORDER BY embedding <-> '{{embedding-1.response.embedding}}' LIMIT 5",
+                "connection": "postgresql://user:pass@localhost:5432/rag_db"
+            },
+            "width": 280,
+            "height": 250
+        },
+        {
+            "id": "contextBuilder-1",
+            "type": "functionNode",
+            "position": {
+                "x": 1380,
+                "y": 100
+            },
+            "data": {
+                "id": "contextBuilder-1",
+                "nodeType": "functionNode",
+                "code": "// Combine retrieved documents into a single context string\nconst docs = database-1.rows;\nlet context = '';\ndocs.forEach((doc, idx) => {\n  context += `[${idx+1}] ${doc.content}\\n\\n`;\n});\nreturn { context: context, question: userInput-1.value };"
+            },
+            "width": 300,
+            "height": 280
+        },
+        {
+            "id": "llmAnswer-1",
+            "type": "llm",
+            "position": {
+                "x": 1800,
+                "y": 100
+            },
+            "data": {
+                "id": "llmAnswer-1",
+                "nodeType": "llm",
+                "model": "gpt-4",
+                "temperature": 0.2,
+                "systemPrompt": "You are a helpful assistant. Answer the user's question based ONLY on the provided context. If the answer is not in the context, say 'I don't have enough information.'",
+                "userPrompt": "Context: {{contextBuilder-1.context}}\\n\\nQuestion: {{contextBuilder-1.question}}"
+            },
+            "width": 300,
+            "height": 280
+        },
+        {
+            "id": "finalOutput-1",
+            "type": "customOutput",
+            "position": {
+                "x": 2250,
+                "y": 150
+            },
+            "data": {
+                "id": "finalOutput-1",
+                "nodeType": "customOutput",
+                "outputName": "answer",
+                "outputType": "Text"
+            },
+            "width": 250,
+            "height": 180
+        }
+    ],
+    "edges": [
+        {
+            "id": "edge-input-to-embedding",
+            "source": "userInput-1",
+            "sourceHandle": "userInput-1-value",
+            "target": "embedding-1",
+            "targetHandle": "embedding-1-body",
+            "type": "smoothstep",
+            "animated": true
+        },
+        {
+            "id": "edge-embedding-to-db",
+            "source": "embedding-1",
+            "sourceHandle": "embedding-1-response",
+            "target": "vectorDB-1",
+            "targetHandle": "vectorDB-1-query",
+            "type": "smoothstep",
+            "animated": true
+        },
+        {
+            "id": "edge-db-to-context",
+            "source": "vectorDB-1",
+            "sourceHandle": "vectorDB-1-rows",
+            "target": "contextBuilder-1",
+            "targetHandle": "contextBuilder-1-input",
+            "type": "smoothstep",
+            "animated": true
+        },
+        {
+            "id": "edge-context-to-llm",
+            "source": "contextBuilder-1",
+            "sourceHandle": "contextBuilder-1-output",
+            "target": "llmAnswer-1",
+            "targetHandle": "llmAnswer-1-prompt",
+            "type": "smoothstep",
+            "animated": true
+        },
+        {
+            "id": "edge-llm-to-output",
+            "source": "llmAnswer-1",
+            "sourceHandle": "llmAnswer-1-response",
+            "target": "finalOutput-1",
+            "targetHandle": "finalOutput-1-value",
+            "type": "smoothstep",
+            "animated": true
+        }
+    ],
+    "viewport": {
+        "x": 0,
+        "y": 0,
+        "zoom": 0.6
+    }
+}
