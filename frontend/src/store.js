@@ -40,7 +40,7 @@ export const useStore = create((set, get) => ({
   searchPalettePosition: null, // {x, y} relative to canvas
   contextMenu: null, // { x, y, nodeId } or null
   propertiesPanelNodeId: null,
-  theme: "light", // 'light' or 'dark'
+  theme: "dark", // Default to dark for a premium first impression
   knifeMode: false, // When true, clicking an edge deletes it
 
   // ── Actions ─────────────────────────────────────────────────
