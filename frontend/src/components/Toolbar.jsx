@@ -19,8 +19,10 @@ import {
   MessageSquare,
   Play,
   Moon,
-  Sun
+  Sun,
+  Zap
 } from 'lucide-react';
+import demoData from '../demo.json';
 import { submitPipeline } from '../submit';
 
 const ToolbarButton = ({ icon: Icon, label, onClick, disabled, danger, active }) => (
@@ -159,6 +161,16 @@ export const Toolbar = () => {
     }
   };
 
+  const handleLoadDemo = () => {
+    try {
+      importPipeline(JSON.stringify(demoData));
+      toast.success('RAG Demo Blueprint loaded!', { icon: '✨' });
+    } catch (err) {
+      console.error('Demo loading error:', err);
+      toast.error('Failed to load demo blueprint');
+    }
+  };
+
   const handleAddStickyNote = () => {
     const id = getNodeID('stickyNote');
     addNode({
@@ -199,6 +211,7 @@ export const Toolbar = () => {
 
         <ToolbarButton icon={Save} label="Save Locally" onClick={savePipeline} />
         <ToolbarButton icon={FolderOpen} label="Load Locally" onClick={loadPipeline} />
+        <ToolbarButton icon={Zap} label="Load Demo RAG Blueprint" onClick={handleLoadDemo} danger />
         <ToolbarButton icon={Download} label="Export JSON" onClick={handleExport} />
         <ToolbarButton icon={Upload} label="Import JSON" onClick={() => fileInputRef.current?.click()} />
         <input ref={fileInputRef} type="file" accept=".json" onChange={handleImport} className="hidden" />
